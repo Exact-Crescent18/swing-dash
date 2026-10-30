@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Swing">
+<meta name="theme-color" content="#05060f">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>Swing Dashboard</title>
+<style>
+:root{
+  --bg:#05060f; --bg2:#0a0c1d; --card:rgba(18,21,44,.62); --card2:rgba(26,30,62,.55);
+  --line:rgba(120,140,255,.14); --text:#e8ecff; --dim:#8b93c7; --faint:#5a6196;
+  --cyan:#00f0ff; --mag:#ff2bd6; --lime:#39ff88; --amber:#ffc935; --red:#ff3b6b; --violet:#8a5cff;
+  --glow-c:0 0 18px rgba(0,240,255,.45); --glow-m:0 0 18px rgba(255,43,214,.45);
+  --r:18px; --safe-b:env(safe-area-inset-bottom); --safe-t:env(safe-area-inset-top);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);max-width:100%;overflow-x:hidden}
+.chip{align-self:flex-start}
+body{font:15px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  background:
+    radial-gradient(900px 500px at 10% -10%,rgba(138,92,255,.22),transparent 60%),
+    radial-gradient(800px 500px at 110% 10%,rgba(0,240,255,.13),transparent 60%),
+    radial-gradient(700px 600px at 50% 120%,rgba(255,43,214,.12),transparent 60%),var(--bg);
+  background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;
+  background-image:linear-gradient(rgba(120,140,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(120,140,255,.06) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+header{position:sticky;top:0;z-index:20;padding:calc(var(--safe-t) + 10px) 16px 10px;
+  background:linear-gradient(180deg,rgba(5,6,15,.92),rgba(5,6,15,.72));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:12px;max-width:1280px;margin:0 auto;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px;font-size:18px}
+.brand img{width:30px;height:30px;border-radius:9px;box-shadow:var(--glow-m)}
+.brand span{background:linear-gradient(90deg,var(--cyan),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pills{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.on .dot{background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 2s infinite}
+.warn .dot{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.off .dot{background:var(--red);box-shadow:0 0 10px var(--red)}
+@keyframes pulse{50%{opacity:.45}}
+nav.top{display:none;gap:4px;max-width:1280px;margin:10px auto 0}
+nav button,.seg button,.chip{font:inherit;cursor:pointer;border:none}
+nav.top button{background:transparent;color:var(--dim);padding:8px 14px;border-radius:12px;font-weight:600}
+nav.top button.act{color:var(--text);background:linear-gradient(90deg,rgba(0,240,255,.16),rgba(255,43,214,.16));
+  box-shadow:inset 0 0 0 1px rgba(0,240,255,.35),var(--glow-c)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;
+  padding:8px 6px calc(var(--safe-b) + 6px);background:rgba(8,9,22,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--line)}
+nav.bottom button{background:none;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10.5px;font-weight:600;padding:4px 8px;flex:1}
+nav.bottom svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav.bottom button.act{color:var(--cyan);text-shadow:0 0 12px rgba(0,240,255,.6)}
+nav.bottom button.act svg{filter:drop-shadow(0 0 6px rgba(0,240,255,.8))}
+main{max-width:1280px;margin:0 auto;padding:16px 16px calc(var(--safe-b) + 96px)}
+@media(min-width:900px){nav.top{display:flex}nav.bottom{display:none}main{padding-bottom:40px}}
+@media(max-width:560px){.big{font-size:21px}.heroval{font-size:36px}.g4 .card{padding:12px}.pill{font-size:11px;padding:3px 8px}
+  .brand span{display:none}.kv b{font-size:13.5px}}
+.view{display:none;animation:fade .35s ease}
+.view.act{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1.6px;color:var(--dim);margin:22px 2px 10px;font-weight:700;
+  display:flex;align-items:center;gap:10px}
+h2:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:minmax(0,1fr)}
+.g2{grid-template-columns:minmax(0,1fr)}
+@media(min-width:700px){.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 15px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;min-width:0}
+.card.glow:before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,rgba(0,240,255,.55),rgba(138,92,255,.15) 40%,rgba(255,43,214,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.lab{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--dim);font-weight:700}
+.big{font-size:27px;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.sub{font-size:12px;color:var(--dim);margin-top:3px}
+.pos{color:var(--lime);text-shadow:0 0 14px rgba(57,255,136,.45)}
+.neg{color:var(--red);text-shadow:0 0 14px rgba(255,59,107,.45)}
+.cy{color:var(--cyan);text-shadow:0 0 14px rgba(0,240,255,.4)}
+.mg{color:var(--mag);text-shadow:0 0 14px rgba(255,43,214,.4)}
+.am{color:var(--amber)}
+.hero{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.hero{grid-template-columns:1.6fr 1fr}}
+.hero .card{padding:18px}
+.heroval{font-size:44px;font-weight:900;letter-spacing:-1.5px;line-height:1.05}
+.spark{width:100%;height:120px;margin-top:10px;display:block}
+.ring{display:flex;align-items:center;gap:16px}
+.ring svg{width:118px;height:118px;flex:none}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--cyan),var(--mag));box-shadow:var(--glow-c)}
+.bar.warnb>i{background:linear-gradient(90deg,var(--amber),var(--red))}
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.3px;
+  background:rgba(255,255,255,.06);color:var(--dim);border:1px solid var(--line);white-space:nowrap}
+.chip.c{color:var(--cyan);border-color:rgba(0,240,255,.4);background:rgba(0,240,255,.08)}
+.chip.m{color:var(--mag);border-color:rgba(255,43,214,.4);background:rgba(255,43,214,.08)}
+.chip.l{color:var(--lime);border-color:rgba(57,255,136,.4);background:rgba(57,255,136,.08)}
+.chip.a{color:var(--amber);border-color:rgba(255,201,53,.4);background:rgba(255,201,53,.08)}
+.chip.r{color:var(--red);border-color:rgba(255,59,107,.4);background:rgba(255,59,107,.08)}
+.chip.v{color:#b9a2ff;border-color:rgba(138,92,255,.45);background:rgba(138,92,255,.1)}
+.pos-card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pos-card .ttl{font-weight:700;font-size:15px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.kv div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:7px 9px;min-width:0}
+.kv b{display:block;font-size:15px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv span{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.clock{font-size:12px;color:var(--cyan);margin-top:8px;font-weight:600}
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);min-width:0}
+.row:last-child{border-bottom:none}
+.row .main{flex:1;min-width:0}
+.row .t1{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .amt{font-weight:800;white-space:nowrap}
+.ev{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:none;font-size:14px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.alert{overflow-wrap:anywhere;display:none;margin-bottom:12px;padding:11px 14px;border-radius:14px;font-size:13px;
+  background:linear-gradient(90deg,rgba(255,59,107,.18),rgba(255,59,107,.06));border:1px solid rgba(255,59,107,.45);
+  box-shadow:0 0 22px rgba(255,59,107,.18)}
+.alert b{color:var(--red)}
+.alert{position:relative;padding-right:40px}
+.alert .ax{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text);font-size:17px;font-weight:700;cursor:pointer;padding:4px 8px}
+.seg{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.seg button{background:none;color:var(--dim);padding:6px 12px;border-radius:9px;font-size:13px;font-weight:600}
+.seg button.act{background:linear-gradient(90deg,rgba(0,240,255,.2),rgba(255,43,214,.2));color:var(--text);box-shadow:inset 0 0 0 1px rgba(0,240,255,.35)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input{flex:1;min-width:160px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:9px 12px;font:inherit;outline:none}
+.toolbar input:focus{border-color:rgba(0,240,255,.55);box-shadow:var(--glow-c)}
+.chipbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-bottom:10px}
+.chipbar::-webkit-scrollbar{display:none}
+.chipbar .chip{padding:6px 12px;font-size:12px;cursor:pointer}
+.game{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+.game:last-child{border-bottom:none}
+.game .when{font-size:12px;color:var(--dim);font-weight:600;line-height:1.25}
+.game .when b{display:block;color:var(--text);font-size:13px}
+.team{display:flex;justify-content:space-between;gap:8px;font-size:14px;min-width:0}
+.team .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.team .p{color:var(--dim);white-space:nowrap;font-size:12.5px}
+.edge{font-weight:800;font-size:13px;padding:5px 9px;border-radius:10px;white-space:nowrap;text-align:right}
+.edge.up{color:var(--lime);background:rgba(57,255,136,.09);box-shadow:inset 0 0 0 1px rgba(57,255,136,.35)}
+.edge.dn{color:var(--faint);background:rgba(255,255,255,.04)}
+.edge small{display:block;font-size:10px;font-weight:600;color:var(--dim)}
+.held{box-shadow:inset 3px 0 0 var(--mag)}
+.empty{color:var(--faint);text-align:center;padding:26px 10px;font-size:14px}
+.legs{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.leg{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--dim)}
+.leg b{color:var(--text);font-weight:600}
+.hedgebox{margin-top:12px;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,rgba(0,240,255,.08),rgba(255,43,214,.08));
+  border:1px solid rgba(0,240,255,.25);font-size:13px}
+.vbar{display:grid;grid-template-columns:96px minmax(0,1fr) 84px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
+.vbar .track{height:10px;border-radius:99px;background:rgba(255,255,255,.05);position:relative;overflow:hidden}
+.vbar .track i{position:absolute;top:0;bottom:0;border-radius:99px}
+.health{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(min-width:700px){.health{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.hcell{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:13px;min-width:0}
+.hcell .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot{color:var(--faint);font-size:11.5px;text-align:center;margin-top:26px}
+.skel{opacity:.5}
+.keybox{max-width:460px;margin:40px auto}
+.keybox input{width:100%;margin:12px 0;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:12px;font:inherit;outline:none}
+.keybox input:focus{border-color:rgba(0,240,255,.55);box-shadow:var(--glow-c)}
+.btn{font:inherit;font-weight:700;cursor:pointer;border:none;border-radius:12px;padding:11px 16px;color:#05060f;
+  background:linear-gradient(90deg,var(--cyan),var(--mag));box-shadow:var(--glow-m)}
+.sbgrid{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));margin-bottom:14px}
+@media(max-width:560px){.sbgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tile{font:inherit;text-align:left;cursor:pointer;color:var(--text);background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:5px 8px;min-width:0;display:flex;flex-direction:column;gap:1px}
+.tile .tn{font-size:11px;font-weight:700;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tile .tp{font-size:12.5px;font-weight:800;display:flex;justify-content:space-between;align-items:baseline;gap:4px;white-space:nowrap}
+.tile .tp small{font-size:10.5px;font-weight:600;color:var(--dim);white-space:nowrap}
+.tile .ts{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.act{border-color:rgba(0,240,255,.6);background:linear-gradient(135deg,rgba(0,240,255,.14),rgba(255,43,214,.12));box-shadow:var(--glow-c)}
+.tile.paused{opacity:.6}
+.trade{padding:11px 2px;border-bottom:1px solid var(--line)}
+.trade:last-child{border-bottom:none}
+.trade .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.trade .t1{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.trade .amt{font-weight:800;white-space:nowrap;text-align:right}
+.trade .amt small{display:block;font-size:11px;color:var(--dim);font-weight:600}
+.trade details{margin-top:6px;font-size:12px;color:var(--faint)}
+.trade summary{cursor:pointer;color:var(--dim)}
+.about{font-size:13px;color:var(--dim);margin:-4px 2px 12px;line-height:1.45}
+.linkbtn{background:none;border:none;color:var(--faint);font:inherit;font-size:11.5px;text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand"><img src="icon.png" alt=""><span>SWING</span></div>
+    <div class="pills" id="pills"><span class="pill"><i class="dot"></i>loading…</span></div>
+  </div>
+  <nav class="top" id="navtop"></nav>
+</header>
+
+<main>
+  <div class="alert" id="alert"></div>
+  <section class="view act" id="v-overview"></section>
+  <section class="view" id="v-swing"></section>
+  <section class="view" id="v-positions"></section>
+  <section class="view" id="v-games"></section>
+  <section class="view" id="v-sandbox"></section>
+  <div class="foot" id="foot"></div>
+</main>
+
+<nav class="bottom" id="navbot"></nav>
+
+<script>
+const TABS = [
+  ["overview","Overview",'<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/>'],
+  ["swing","Swingdesk",'<path d="M3 17l5-6 4 3 7-9"/><path d="M15 5h4v4"/>'],
+  ["positions","Positions",'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 4v16"/>'],
+  ["games","Games",'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>'],
+  ["sandbox","Sandbox",'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
+];
+let tab = (()=>{const h=location.hash.slice(1); if(h) return h; try{return localStorage.getItem("tab")||"overview"}catch(e){return "overview"}})();
+// Two ways this page runs: from the Mac's dashboard server (same origin /api/data), or from GitHub Pages, where it
+// reads data.json from your PRIVATE repo with a read-only key that's stored only on this device.
+const GH = /\.github\.io$/.test(location.hostname);
+let GHCONF = null;
+const ghToken = () => { try{ return localStorage.getItem("ghkey") || ""; }catch(e){ return ""; } };
+const KEY = (()=>{ let k = new URLSearchParams(location.search).get("k");     // the private key from the link
+  try{ if(k) localStorage.setItem("k", k); else k = localStorage.getItem("k"); }catch(e){}
+  return k || ""; })();
+let sbFilter = "open"; const sbOpen = new Set();   // trades whose history is expanded (kept across refreshes)
+let D = null, missedVar = "pregame", gLeague = "All", gSearch = "", gOnlyEdge = false, sbSel = null, lastOk = 0;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = (x, sign=false) => x==null||isNaN(x) ? "–" :
+  (sign && x>0.004 ? "+" : x<-0.004 ? "−" : "") + "$" + Math.abs(x).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const kmoney = x => Math.abs(x)>=10000 ? (x<0?"−":"")+"$"+(Math.abs(x)/1000).toFixed(1)+"k" : money(x);
+const cls = x => x>0.004 ? "pos" : x<-0.004 ? "neg" : "";
+const pct = (x,d=0) => x==null ? "–" : (x*100).toFixed(d)+"%";
+const cents = x => x==null ? "–" : (x*100).toFixed(1)+"¢";
+const tm = t => t ? new Date(t*1000).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/Los_Angeles"}) : "";
+const dt = t => t ? new Date(t*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"America/Los_Angeles"}) : "";
+const ago = t => { if(!t) return "never"; const s = Date.now()/1000 - t; return s<60 ? Math.round(s)+"s ago" : s<3600 ? Math.round(s/60)+"m ago" : Math.round(s/3600)+"h ago"; };
+const wl = o => `${o.won}–${o.lost}` + (o.n ? ` · ${Math.round(o.won/Math.max(o.n,1)*100)}% won` : "");
+
+function buildNav(){
+  const b = TABS.map(([k,l,ic]) => `<button data-t="${k}" class="${k===tab?"act":""}"><svg viewBox="0 0 24 24">${ic}</svg>${l}</button>`).join("");
+  $("#navbot").innerHTML = b;
+  $("#navtop").innerHTML = TABS.map(([k,l]) => `<button data-t="${k}" class="${k===tab?"act":""}">${l}</button>`).join("");
+  document.querySelectorAll("nav button").forEach(x => x.onclick = () => setTab(x.dataset.t));
+}
+function setTab(t){
+  tab = t; try{localStorage.setItem("tab",t)}catch(e){}
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("act", x.dataset.t===t));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("act", v.id==="v-"+t));
+  window.scrollTo({top:0,behavior:"smooth"}); render();
+}
+
+// ---- charts ---------------------------------------------------------------------------------------------
+function spark(pts, id, h=120){
+  id = id + "_" + (++UID);
+  if(!pts || pts.length<2) return `<div class="empty" style="padding:30px 0">No closed trades yet</div>`;
+  const W=600, H=h, P=6;
+  const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]).concat([0]);
+  const x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const X=t=>P+(W-2*P)*(t-x0)/Math.max(x1-x0,1), Y=v=>H-P-(H-2*P)*(v-y0)/Math.max(y1-y0,1e-9);
+  const d=pts.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join("");
+  const last=pts[pts.length-1][1], c= last>=0 ? "var(--cyan)" : "var(--red)", c2= last>=0 ? "var(--mag)" : "var(--amber)";
+  return `<svg class="spark" style="height:${h}px" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="l${id}" x1="0" x2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+    <linearGradient id="f${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient>
+    <filter id="g${id}"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="rgba(139,147,199,.25)" stroke-dasharray="4 5" vector-effect="non-scaling-stroke"/>
+    <path d="${d}L${X(x1)},${H}L${X(x0)},${H}Z" fill="url(#f${id})"/>
+    <path d="${d}" fill="none" stroke="url(#l${id})" stroke-width="2.6" vector-effect="non-scaling-stroke" filter="url(#g${id})"/>
+  </svg>`;
+}
+let UID = 0;                       // SVG gradient ids must be unique across every view (hidden ones included)
+function ring(frac, label, sub, warn){
+  const r=48, C=2*Math.PI*r, f=Math.max(0,Math.min(frac,1)), gid="rg"+(++UID);
+  const c1 = warn ? "var(--amber)" : "var(--cyan)", c2 = warn ? "var(--red)" : "var(--mag)";
+  return `<svg viewBox="0 0 118 118"><defs><linearGradient id="${gid}" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+    <circle cx="59" cy="59" r="${r}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="11"/>
+    <circle cx="59" cy="59" r="${r}" fill="none" stroke="url(#${gid})" stroke-width="11" stroke-linecap="round"
+      stroke-dasharray="${(C*f).toFixed(1)} ${C}" opacity="${f>0.002?1:0}" transform="rotate(-90 59 59)" style="filter:drop-shadow(0 0 6px ${c1})"/>
+    <text x="59" y="57" text-anchor="middle" fill="#e8ecff" font-size="20" font-weight="800" class="num">${esc(label)}</text>
+    <text x="59" y="75" text-anchor="middle" fill="#8b93c7" font-size="10.5" font-weight="600">${esc(sub)}</text></svg>`;
+}
+const stat = (lab, val, sub="", c="") => `<div class="card"><div class="lab">${lab}</div><div class="big num ${c}">${val}</div><div class="sub">${sub}</div></div>`;
+
+// ---- views ----------------------------------------------------------------------------------------------
+function overview(){
+  const s=D.swingdesk||{}, p=D.positions||{}, sb=D.sandbox||[];
+  if(s.error) return `<div class="card">swingdesk data: ${esc(s.error)}</div>`;
+  const all=s.pnl?.all||{}, today=s.pnl?.today||{}, week=s.pnl?.week||{};
+  const used=(s.committed||0)/(s.bankroll||5000);
+  const opn=s.open||[], hedged=opn.filter(x=>x.status==="hedged").length;
+  const m=s.missed?.[missedVar]||{};
+  return `
+  <div class="hero">
+    <div class="card glow">
+      <div class="lab">Swingdesk · all-time P/L <span class="chip ${s.mode==="LIVE"?"m":"c"}" style="margin-left:6px">${esc(s.mode||"")}</span></div>
+      <div class="heroval num ${cls(all.pnl)}">${money(all.pnl,true)}</div>
+      <div class="sub">${all.n||0} closed · ${wl(all)}</div>
+      ${spark(s.curve,"a")}
+    </div>
+    <div class="card glow">
+      <div class="lab">Bankroll in use</div>
+      <div class="ring" style="margin-top:8px">${ring(used, pct(used), "of "+kmoney(s.bankroll||0), used>1)}
+        <div>
+          <div class="sub">Committed</div><div class="big num" style="font-size:22px">${money(s.committed)}</div>
+          <div class="sub" style="margin-top:8px">Locked in <b class="pos num">${money(s.locked,true)}</b></div>
+          <div class="sub">At risk <b class="am num">${money(s.at_risk)}</b></div>
+        </div></div>
+      <div class="sub" style="margin-top:10px">${opn.length} open · ${hedged} hedged · ${s.games_total||0} games watched</div>
+    </div>
+  </div>
+  <div class="grid g4" style="margin-top:12px">
+    ${stat("Today", money(today.pnl,true), `${today.n||0} closed · ${wl(today)}`, cls(today.pnl))}
+    ${stat("This week", money(week.pnl,true), `${week.n||0} closed · ${wl(week)}`, cls(week.pnl))}
+    ${stat("Positions realized", money(p.pnl?.all?.pnl,true), `today ${money(p.pnl?.today?.pnl,true)} · week ${money(p.pnl?.week?.pnl,true)}`, cls(p.pnl?.all?.pnl))}
+    ${stat("Missed (not entered)", money(m.pnl,true), `${m.n||0} games · ${m.won||0}–${m.lost||0}${m.full?` · ${m.full} bankroll full`:""}`, cls(m.pnl))}
+  </div>
+  <h2>Open positions</h2>
+  ${opn.length ? `<div class="grid g3">${opn.slice(0,6).map(posCard).join("")}</div>` : `<div class="card empty">No open positions</div>`}
+  <h2>Sandbox</h2>
+  <div class="sbgrid">${sb.map(x=>sbTile(x,false,true)).join("")}</div>
+  <h2>Latest activity</h2>
+  <div class="card"><div class="list">${(s.events||[]).slice(0,8).map(evRow).join("") || `<div class="empty">Nothing yet</div>`}</div></div>`;
+}
+
+function posCard(x){
+  const prog = x.qty ? Math.min(x.hedge_qty/x.qty,1) : 0;
+  const st = x.status==="hedged" ? `<span class="chip l">locked</span>` : `<span class="chip a">hedging</span>`;
+  const r = x.resting;
+  return `<div class="card pos-card ${x.status==="hedged"?"":"glow"}">
+    <div class="top"><div style="min-width:0"><div class="ttl">${esc(x.title)}</div>
+      <div class="chips"><span class="chip v">${esc(x.league)}</span>${st}<span class="chip">${esc(x.entry)}</span><span class="chip c">${esc(x.venue)}</span></div></div></div>
+    <div class="kv">
+      <div><span>Anchor</span><b class="num">${esc(x.team?.split(" ").slice(-1)[0])} ${cents(x.anchor)}</b></div>
+      <div><span>If win</span><b class="num ${cls(x.if_win)}">${money(x.if_win,true)}</b></div>
+      <div><span>If lose</span><b class="num ${cls(x.if_lose)}">${money(x.if_lose,true)}</b></div>
+    </div>
+    <div class="sub" style="margin-top:10px;display:flex;justify-content:space-between"><span>Hedged ${Math.round(x.hedge_qty)} / ${Math.round(x.qty)}${x.hedge_avg?` @ ${cents(x.hedge_avg)}`:""}</span><span class="num">${pct(prog)}</span></div>
+    <div class="bar"><i style="width:${(prog*100).toFixed(1)}%"></i></div>
+    ${r ? `<div class="sub" style="margin-top:8px">Bid ${Math.round(r.qty-(r.filled||0))} × ${esc(x.other)} @ <b class="cy">${cents(r.price)}</b> · ${esc(r.venue)}${r.stage?` · ${esc(r.stage)}`:""}</div>` : ""}
+    ${x.clock ? `<div class="clock">● ${esc(x.clock)}</div>` : x.start_ts ? `<div class="sub" style="margin-top:6px">Starts ${dt(x.start_ts)} ${tm(x.start_ts)}</div>`:""}
+  </div>`;
+}
+const EVI = {placed:"🎯",filled:"✅",bought:"⚡",cancelled:"✖",refused:"⛔",settled:"🏁",defensive:"🛡","take missed":"…","cancel failed":"⚠"};
+function evRow(e){
+  return `<div class="row"><div class="ev">${EVI[e.kind]||"•"}</div><div class="main">
+    <div class="t1">${esc(e.kind)} · ${esc(e.title)}</div>
+    <div class="t2">${e.qty?Math.round(e.qty)+" × ":""}${esc(e.team||"")}${e.price?" @ "+cents(e.price):""}${e.venue?" · "+esc(e.venue):""}${e.note?" · "+esc(e.note):""}</div></div>
+    <div class="t2 num">${tm(e.t)}</div></div>`;
+}
+
+function swing(){
+  const s=D.swingdesk||{}; if(s.error) return `<div class="card">${esc(s.error)}</div>`;
+  const m=s.missed?.[missedVar]||{};
+  return `
+  <div class="grid g4">
+    ${stat("Today", money(s.pnl?.today?.pnl,true), wl(s.pnl?.today||{}), cls(s.pnl?.today?.pnl))}
+    ${stat("This week", money(s.pnl?.week?.pnl,true), wl(s.pnl?.week||{}), cls(s.pnl?.week?.pnl))}
+    ${stat("All time", money(s.pnl?.all?.pnl,true), wl(s.pnl?.all||{}), cls(s.pnl?.all?.pnl))}
+    ${stat("Committed", money(s.committed), `of ${money(s.bankroll)} bankroll`, (s.committed>(s.bankroll||1e9))?"am":"cy")}
+  </div>
+  <div class="card glow" style="margin-top:12px"><div class="lab">Realized P/L over time · all time</div>
+    <div class="big num ${cls(s.pnl?.all?.pnl)}">${money(s.pnl?.all?.pnl,true)}</div>${spark(s.curve,"sw",150)}</div>
+  <h2>Missed (not entered)</h2>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div><div class="big num ${cls(m.pnl)}">${money(m.pnl,true)}</div>
+      <div class="sub">${m.n||0} games · ${m.won||0}–${m.lost||0}${m.n?` · ${pct(m.won/m.n)} won`:""}${m.full?` · ${m.full} skipped: bankroll full`:""}</div></div>
+      <div class="seg" id="mseg"><button data-v="pregame" class="${missedVar==="pregame"?"act":""}">Pre-game</button><button data-v="limit" class="${missedVar==="limit"?"act":""}">Band-top limit</button></div>
+    </div>
+    <div class="lab" style="margin-top:12px">Missed P/L over time · ${missedVar==="limit"?"band-top limit":"pre-game price"}</div>
+    ${spark(m.curve,"ms",130)}
+  </div>
+  <h2>Open positions · ${(s.open||[]).length}</h2>
+  ${(s.open||[]).length ? `<div class="grid g3">${s.open.map(posCard).join("")}</div>` : `<div class="card empty">No open positions</div>`}
+  <h2>Recently closed</h2>
+  <div class="card"><div class="list">${(s.recent||[]).slice(0,20).map(r=>`<div class="row"><div class="main">
+    <div class="t1">${esc(r.title)}</div><div class="t2">${esc(r.league)} · ${esc(r.team)} · ${esc(r.closed_by||"settled")} · ${dt(r.closed)} ${tm(r.closed)}</div></div>
+    <div class="amt num ${cls(r.result)}">${money(r.result,true)}</div></div>`).join("") || `<div class="empty">Nothing closed yet</div>`}</div></div>
+  <h2>Activity</h2>
+  <div class="card"><div class="list">${(s.events||[]).slice(0,30).map(evRow).join("") || `<div class="empty">Nothing yet</div>`}</div></div>
+  <h2>Health</h2>
+  <div class="health">
+    ${(s.feeds||[]).filter(f=>f.configured).map(f=>`<div class="hcell"><span class="pill ${f.ok?"on":"off"}" style="padding:0;border:none;background:none"><i class="dot"></i></span><span class="n">${esc(f.name)}${f.games?` · ${f.games}`:""}</span></div>`).join("")}
+    ${Object.entries(s.venues||{}).map(([k,v])=>`<div class="hcell"><span class="pill ${v.feed==="live"?"on":v.feed?"warn":"off"}" style="padding:0;border:none;background:none"><i class="dot"></i></span><span class="n">${esc(k)} · ${esc(v.feed||"off")}${v.orders?" · orders":""}</span></div>`).join("")}
+  </div>`;
+}
+
+function positionsView(){
+  const p=D.positions||{}; if(p.error) return `<div class="card">${esc(p.error)}</div>`;
+  const plans=p.plans||[];
+  const bv=Object.entries(p.by_venue||{}).sort((a,b)=>b[1]-a[1]);
+  const mx=Math.max(1,...bv.map(x=>Math.abs(x[1])));
+  return `
+  ${!p.alive ? `<div class="card" style="margin-bottom:12px;border-color:rgba(255,201,53,.4)"><b class="am">Positions isn't sending live holdings</b><div class="sub">Open the Positions app (restart it once after this update): it writes a snapshot every 10 s. ${p.t?"Last one "+ago(p.t)+".":""}</div></div>`:""}
+  <div class="grid g4">
+    ${stat("Realized today", money(p.pnl?.today?.pnl,true), `${p.pnl?.today?.n||0} results`, cls(p.pnl?.today?.pnl))}
+    ${stat("This week", money(p.pnl?.week?.pnl,true), `${p.pnl?.week?.n||0} results`, cls(p.pnl?.week?.pnl))}
+    ${stat("All time", money(p.pnl?.all?.pnl,true), `${p.pnl?.all?.n||0} results`, cls(p.pnl?.all?.pnl))}
+    ${stat("Held · to hedge", money(p.held_cost), `${plans.length} games · hedge needs ${money(p.to_hedge)}`, "cy")}
+  </div>
+  <div class="card" style="margin-top:12px"><div class="lab">Realized P/L over time</div>${spark(p.curve,"p")}</div>
+  <h2>Holdings & hedge plans</h2>
+  ${plans.length ? `<div class="grid g2">${plans.map(pl=>`<div class="card ${pl.shares>0?"glow":""}">
+     <div class="top" style="display:flex;justify-content:space-between;gap:8px"><div style="min-width:0"><div class="ttl" style="font-weight:700">${esc(pl.title)}</div>
+     <div class="chips">${pl.league?`<span class="chip v">${esc(pl.league)}</span>`:""}<span class="chip c">long ${esc(pl.held)}</span>${pl.shares>0?`<span class="chip a">needs hedge</span>`:`<span class="chip l">hedged</span>`}</div></div>
+     <div style="text-align:right"><div class="lab">Cost</div><div class="num" style="font-weight:800">${money(pl.cost)}</div></div></div>
+     <div class="legs">${(pl.legs||[]).map(l=>`<div class="leg"><span><b>${esc(l.label)}</b> · ${esc(l.venue)} · <span class="chip ${l.source==="manual"?"":"m"}" style="padding:0 6px">${esc(l.source)}</span></span><span class="num">${Math.round(l.qty)} @ ${cents(l.avg)}</span></div>`).join("")}</div>
+     ${pl.shares>0 ? `<div class="hedgebox">Buy <b class="num">${Math.round(pl.shares)}</b> × ${esc(pl.hedge)} @ <b class="cy num">${cents(pl.bid)}</b> on ${esc(pl.venue)} = <b class="num">${money(pl.dollars)}</b>${pl.locks!=null?` → locks <b class="num ${cls(pl.locks)}">${money(pl.locks,true)}</b>`:""}</div>`
+        : `<div class="sub" style="margin-top:10px">${Math.round(pl.hedged_pairs)} pairs pay <b class="pos num">${money(pl.payout)}</b> whoever wins</div>`}
+     ${pl.note?`<div class="sub" style="margin-top:6px">${esc(pl.note)}</div>`:""}
+   </div>`).join("")}</div>` : `<div class="card empty">${p.alive?"No open holdings":"Waiting for Positions…"}</div>`}
+  <h2>Realized by venue</h2>
+  <div class="card">${bv.map(([v,x])=>`<div class="vbar"><span>${esc(v)}</span><div class="track"><i style="left:0;width:${(Math.abs(x)/mx*100).toFixed(1)}%;background:${x>=0?"linear-gradient(90deg,var(--cyan),var(--lime))":"linear-gradient(90deg,var(--amber),var(--red))"}"></i></div><b class="num ${cls(x)}" style="text-align:right">${money(x,true)}</b></div>`).join("") || `<div class="empty">No results yet</div>`}</div>
+  ${Object.keys(p.errors||{}).length?`<h2>Read errors</h2><div class="card">${Object.entries(p.errors).map(([k,v])=>`<div class="row"><div class="main"><div class="t1">${esc(k)}</div><div class="t2">${esc(v)}</div></div></div>`).join("")}</div>`:""}`;
+}
+
+function gamesView(){
+  const g=D.games||{}; if(g.error) return `<div class="card">${esc(g.error)}</div>`;
+  const today = new Date().toLocaleDateString("en-CA",{timeZone:"America/Los_Angeles"});
+  let gs=(g.games||[]);
+  const leagues=["All",...new Set(gs.map(x=>x.league))];
+  gs=gs.filter(x=>(gLeague==="All"||x.league===gLeague)
+    && (!gSearch || (x.title||"").toLowerCase().includes(gSearch.toLowerCase()))
+    && (!gOnlyEdge || (x.best && x.best.edge>0)));
+  const markChip = m => m==="filled"?`<span class="chip m">filled</span>`:m==="wait"?`<span class="chip a">wait</span>`:m==="pass"?`<span class="chip">pass</span>`:"";
+  return `
+  <div class="toolbar"><input id="gsearch" placeholder="Search teams…" value="${esc(gSearch)}">
+    <div class="seg"><button id="gedge" class="${gOnlyEdge?"act":""}">+ edge only</button></div></div>
+  <div class="chipbar">${leagues.map(l=>`<span class="chip ${l===gLeague?"c":""}" data-l="${esc(l)}">${esc(l)}</span>`).join("")}</div>
+  <div class="card"><div class="lab" style="margin-bottom:4px">${esc(g.day||today)} · ${gs.length} games · Pacific time</div>
+  ${gs.map(x=>{
+    const b=x.best, live=x.state==="in", fin=x.state==="post";
+    return `<div class="game ${x.held&&x.held.length?"held":""}">
+      <div class="when">${live?`<b class="cy">LIVE</b>`:fin?`<b>Final</b>`:`<b>${tm(x.start_ts)}</b>`}${esc(x.league)}</div>
+      <div style="min-width:0">${(x.teams||[]).map(t=>`<div class="team"><span class="n">${esc(t.name)}</span><span class="p num">${t.fair!=null?pct(t.fair):"–"} · ${cents(t.ask)}</span></div>`).join("")}
+        <div class="chips" style="margin-top:4px">${markChip(x.mark)}${x.clock&&x.state!=="pre"?`<span class="chip c">${esc(x.clock)}</span>`:""}${(x.held||[]).map(h=>`<span class="chip m">${esc(h)}</span>`).join("")}</div></div>
+      <div class="edge ${b&&b.edge>0?"up":"dn"}">${b?(b.edge>0?"+":"")+(b.edge*100).toFixed(1)+"¢":"–"}<small>${b?esc((b.team||"").split(" ").slice(-1)[0]):""}</small></div>
+    </div>`}).join("") || `<div class="empty">No games</div>`}</div>`;
+}
+
+const alertGone = {};   // dismissed problems: key -> the text dismissed (a new or changed one shows again)
+function sbTile(x, act, go){
+  return `<button class="tile${act?" act":""}${x.running?"":" paused"}" data-s="${x.slug}"${go?' data-go="1"':""}>
+    <span class="tn">${esc(x.name)}${x.running?"":" · paused"}</span>
+    <span class="tp num"><span class="${cls(x.pnl)}">${money(x.pnl,true)}</span><small>${x.won}-${x.lost}</small></span></button>`;
+}
+const px = x => x==null ? "–" : (x*100).toFixed(1)+"¢";
+function sbTrade(p){
+  const done = p.status==="settled", open = !done;
+  const st = done ? ({settled:"settled",cutoff:"closed at cutoff",cashout:"cashed out"}[p.closed_by]||p.closed_by||"settled")
+    : p.trap && !p.a_qty ? "trap resting" : p.status==="hedged" ? "LOCKED" : p.status==="flipping" ? "flip bid resting"
+    : p.status==="flipped" ? "flipped" : "open, unhedged";
+  const stc = done ? (p.result>0.004?"l":p.result<-0.004?"r":"") : p.status==="hedged" ? "l" : "a";
+  const legs = [];
+  if(p.a_qty) legs.push(`<div class="leg"><span>Anchor · ${esc(p.team)}</span><b class="num">${p.a_qty.toLocaleString()} @ ${px(p.a_px)} · ${money(p.a_cost)}</b></div>`);
+  else legs.push(`<div class="leg"><span>Anchor · ${esc(p.team)}</span><b>not filled yet</b></div>`);
+  if(p.b_qty) legs.push(`<div class="leg"><span>Other side · ${esc(p.other)}</span><b class="num">${p.b_qty.toLocaleString()} @ ${px(p.b_px)} · ${money(p.b_cost)}</b></div>`);
+  if(p.sold>0) legs.push(`<div class="leg"><span>Anchor sold back</span><b class="num">${p.sold.toLocaleString()} for ${money(p.proceeds)}</b></div>`);
+  if(p.resting && open) legs.push(`<div class="leg"><span>Resting ${esc(p.resting.kind)} bid</span><b class="num">${p.resting.qty.toLocaleString()} @ ${px(p.resting.price)}</b></div>`);
+  const right = done ? `<span class="${cls(p.result)}">${money(p.result,true)}</span><small>${dt(p.closed)} ${tm(p.closed)}</small>`
+    : `<span class="cy">${money(p.cost)}</span><small>in · ${dt(p.opened)} ${tm(p.opened)}</small>`;
+  return `<div class="trade"><div class="top"><div style="min-width:0"><div class="t1">${esc(p.title)}</div>
+      <div class="chips"><span class="chip">${esc(p.league)}</span><span class="chip v">${esc(p.entry)}</span><span class="chip ${stc}">${esc(st)}</span>
+      ${p.winner?`<span class="chip">won: ${esc(p.winner)}</span>`:""}<span class="chip">${esc(p.venue||"")}</span></div></div>
+      <div class="amt num">${right}</div></div>
+    <div class="legs">${legs.join("")}</div>
+    ${(p.log||[]).length?`<details data-k="${esc(p.id)}"${sbOpen.has(String(p.id))?" open":""}><summary>history</summary>${p.log.map(l=>`<div>${esc(l)}</div>`).join("")}</details>`:""}</div>`;
+}
+function sandboxView(){
+  const sb=D.sandbox||[]; if(sb.error) return `<div class="card">${esc(sb.error)}</div>`;
+  if(!sb.length) return `<div class="card empty">No sandbox strategies</div>`;
+  if(!sbSel || !sb.find(x=>x.slug===sbSel)) sbSel=sb[0].slug;
+  const x=sb.find(s=>s.slug===sbSel), cap=x.peak/(x.bankroll||5000);
+  const ps=x.positions||[], nOpen=ps.filter(p=>p.status!=="settled").length, nDone=ps.length-nOpen;
+  const shown=ps.filter(p=>sbFilter==="all"||(sbFilter==="open")===(p.status!=="settled"));
+  return `
+  <div class="sbgrid" id="sbtiles">${sb.map(s=>sbTile(s, s.slug===sbSel)).join("")}</div>
+  <div class="hero">
+    <div class="card glow"><div class="lab">${esc(x.name)} · paper · v${x.version} <span class="chip ${x.running?"l":"a"}" style="margin-left:6px">${x.running?"running":"paused"}</span></div>
+      <div class="heroval num ${cls(x.pnl)}">${money(x.pnl,true)}</div>
+      <div class="sub">${x.closed} closed · ${x.won}–${x.lost} · ROI ${x.roi==null?"–":(x.roi>=0?"+":"")+pct(x.roi,1)}</div>${spark(x.curve,"x")}</div>
+    <div class="card glow"><div class="lab">Capital needed</div>
+      <div class="ring" style="margin-top:8px">${ring(cap, pct(cap), "of "+kmoney(x.bankroll), cap>1)}
+      <div><div class="sub">Peak tied up</div><div class="big num" style="font-size:22px">${money(x.peak)}</div>
+      <div class="sub" style="margin-top:8px">Open now <b class="cy num">${money(x.committed)}</b></div><div class="sub">${x.open} open</div></div></div>
+      <div class="sub" style="margin-top:10px">Bankroll caps anchors only; hedges come on top.</div></div>
+  </div>
+  ${x.description?`<div class="about" style="margin-top:12px">${esc(x.description)}</div>`:""}
+  <div class="grid g4" style="margin-top:12px">
+    ${stat("Success rate", x.closed?pct(x.won/x.closed):"–", `${x.won} won · ${x.lost} lost`+(x.be_rate!=null?` · needs ${pct(x.be_rate)}`:""), "cy")}
+    ${stat("EV per trade", money(x.ev,true), `avg win ${money(x.avg_win)} · avg loss ${money(x.avg_loss)}`, cls(x.ev||0))}
+    ${stat("ROI", x.roi==null?"–":(x.roi>=0?"+":"")+pct(x.roi,1), "on money spent", cls(x.roi||0))}
+    ${stat("Peak / bankroll", pct(cap), money(x.peak), cap>1?"am":"")}
+  </div>
+  <h2>Trades</h2>
+  <div class="seg" id="sbfilt" style="margin-bottom:10px">${[["open",`Open (${nOpen})`],["closed",`Closed (${nDone})`],["all",`All (${ps.length})`]]
+    .map(([k,l])=>`<button data-f="${k}" class="${k===sbFilter?"act":""}">${l}</button>`).join("")}</div>
+  <div class="card">${shown.map(sbTrade).join("") || `<div class="empty">No ${sbFilter==="all"?"":sbFilter+" "}trades</div>`}</div>`;
+}
+
+// ---- render / data --------------------------------------------------------------------------------------
+function pills(){
+  const s=D.swingdesk||{}, p=D.positions||{};
+  if(GH && Date.now()/1000 - (D.t||0) > 180){ s.alive = false; p.alive = false; }   // the Mac stopped pushing
+  const sw = s.alive ? `<span class="pill on"><i class="dot"></i>swingdesk ${esc(s.mode||"")}${s.paused?" · paused":""}</span>` : `<span class="pill off"><i class="dot"></i>swingdesk stopped</span>`;
+  const po = p.alive ? `<span class="pill on"><i class="dot"></i>Positions</span>` : `<span class="pill warn"><i class="dot"></i>Positions offline</span>`;
+  const age = Date.now()/1000 - (D.t||0);
+  const stale = Date.now()/1000 - lastOk > (GH?90:20) ? `<span class="pill off"><i class="dot"></i>no connection</span>`
+    : GH && age > 180 ? `<span class="pill warn"><i class="dot"></i>Mac asleep · data ${ago(D.t)}</span>` : "";
+  $("#pills").innerHTML = stale + sw + po;
+  const probs=(s.problems||[]).filter(x=>x.level==="bad");
+  const a=$("#alert");
+  const show = probs.filter(x=>alertGone[x.key||x.text]!==x.text);
+  a.style.display = show.length ? "block" : "none";
+  a.innerHTML = show.map(x=>`<div><b>⚠</b> ${esc(x.text)}</div>`).join("") + `<button class="ax" title="Dismiss" aria-label="Dismiss">✕</button>`;
+  a.querySelector(".ax").onclick = ()=>{ show.forEach(x=>alertGone[x.key||x.text]=x.text); pills(); };
+  for(const k in alertGone) if(!probs.some(x=>(x.key||x.text)===k)) delete alertGone[k];  // cleared: shows again if it returns
+}
+function render(){
+  if(!D) return;
+  pills();
+  const keepY = window.scrollY, f = document.activeElement && document.activeElement.id;
+  const v = {overview, swing, positions:positionsView, games:gamesView, sandbox:sandboxView}[tab];
+  $("#v-"+tab).innerHTML = v();
+  $("#foot").innerHTML = "Data from " + esc(new Date(D.t*1000).toLocaleString()) + " · read-only · refreshes every " + (GH?"30":"5") + " s"
+    + (GH ? ` · <button class="linkbtn" onclick="forgetKey()">forget key</button>` : "");
+  document.querySelectorAll("#mseg button").forEach(b=>b.onclick=()=>{missedVar=b.dataset.v;render()});
+  document.querySelectorAll(".tile").forEach(b=>b.onclick=()=>{sbSel=b.dataset.s; if(b.dataset.go) setTab("sandbox"); else render()});
+  document.querySelectorAll(".trade details").forEach(d=>d.ontoggle=()=>{d.open?sbOpen.add(d.dataset.k):sbOpen.delete(d.dataset.k)});
+  document.querySelectorAll("#sbfilt button").forEach(b=>b.onclick=()=>{sbFilter=b.dataset.f;render()});
+  document.querySelectorAll(".chipbar .chip").forEach(c=>c.onclick=()=>{gLeague=c.dataset.l;render()});
+  const ge=$("#gedge"); if(ge) ge.onclick=()=>{gOnlyEdge=!gOnlyEdge;render()};
+  const gi=$("#gsearch"); if(gi){ gi.oninput=e=>{gSearch=e.target.value;render()}; if(f==="gsearch"){gi.focus();gi.setSelectionRange(gi.value.length,gi.value.length)} }
+  window.scrollTo(0,keepY);
+}
+function keyForm(msg){
+  $("#v-"+tab).innerHTML = `<div class="card glow keybox"><div class="lab">Private data</div>
+    <div class="big" style="font-size:22px">Paste your read-only key</div>
+    <div class="sub">The GitHub key that can only READ your private data repo (${esc(GHCONF?GHCONF.owner+"/"+GHCONF.repo:"")}). It's saved on this device only.</div>
+    ${msg?`<div class="sub neg" style="margin-top:8px">${esc(msg)}</div>`:""}
+    <input id="ghkey" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button class="btn" id="ghsave">Unlock dashboard</button></div>`;
+  $("#ghsave").onclick = () => { const v=$("#ghkey").value.trim(); if(!v) return; try{localStorage.setItem("ghkey",v)}catch(e){} load(); };
+}
+async function fetchData(){
+  if(!GH){
+    const r = await fetch("/api/data" + (KEY ? "?k=" + encodeURIComponent(KEY) : ""),{cache:"no-store",credentials:"same-origin"});
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }
+  if(!GHCONF) GHCONF = await (await fetch("config.json",{cache:"no-store"})).json();
+  const tok = ghToken();
+  if(!tok){ const e = new Error("nokey"); e.nokey = true; throw e; }
+  const r = await fetch(`https://api.github.com/repos/${GHCONF.owner}/${GHCONF.repo}/contents/data.json?ref=main&t=${Date.now()}`,
+    {cache:"no-store", headers:{"Authorization":"Bearer "+tok, "Accept":"application/vnd.github.raw+json"}});
+  if(r.status===401 || r.status===403 || r.status===404){
+    const e = new Error(r.status===404 ? "That key can't see the data repo (or nothing pushed yet)." : "That key was refused by GitHub.");
+    e.nokey = true; throw e;
+  }
+  if(!r.ok) throw new Error("GitHub "+r.status);
+  return r.json();
+}
+async function load(){
+  if(document.hidden) return;
+  try{
+    D = await fetchData(); lastOk = Date.now()/1000; render();
+  }catch(e){
+    if(e.nokey){ if(e.message!=="nokey") try{localStorage.removeItem("ghkey")}catch(x){} D=null; keyForm(e.message==="nokey"?"":e.message); return; }
+    if(D) pills(); else $("#v-overview").innerHTML = `<div class="card empty">Can't load data (${esc(e.message)}). ${GH?"Check your connection.":"Is dashboard.command running on the Mac?"}</div>`;
+  }
+}
+function forgetKey(){ try{localStorage.removeItem("ghkey")}catch(e){} D=null; keyForm(""); }
+buildNav(); setTab(tab); load();
+setInterval(load, GH ? 30000 : 5000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>
